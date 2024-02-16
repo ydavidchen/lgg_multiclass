@@ -8,11 +8,8 @@ source("utils.R")
 patients <- read.csv(paste0(TCGA_DIR,"nationwidechildrens.org_LGG_bio.patient.tsv"), sep="\t", na.strings=c("NA",""))
 colnames(patients)[1] <- "patient"
 patients$age <- as.integer(patients$age_at_initial_pathologic_diagnosis)
-patients$raceWhite <- patients$race == "WHITE"
-patients$ethHisp <- patients$ethnicity == "HISPANIC OR LATINO"
-patients <- patients[ , c("patient","gender","histologic_diagnosis","tumor_grade","age","raceWhite","ethHisp")]
+patients <- patients[ , c("patient","tumor_grade")]
 
-## Samples:
 samples <- read.csv(paste0(TCGA_DIR,"nationwidechildrens.org_LGG_bio.sample.tsv"), sep="\t")
 samples <- subset(samples, sample_type == "Primary Tumor")
 samples <- samples[ , "sample", drop=FALSE]
@@ -21,20 +18,22 @@ samples$patient <- substr(samples$sample, 1, 12)
 patients <- merge(samples, patients, by="patient")
 patients$SAMPLE_ID <- substr(patients$sample, 1, 15)
 
-## Additional covariates from cBioPortal:
 cbio <- read.csv(paste0(TCGA_DIR,"cbio_queries/lgg_tcga_pan_can_atlas_2018_clinical_data.tsv"), sep="\t", check.names=FALSE)
+cbio <- subset(cbio, ! is.na(Subtype))
 cbio$Subtype <- toupper(gsub("LGG_|-|IDH|non-codel", "", cbio$Subtype))
-cbio <- cbio[ , c("Patient ID","Sample ID","Subtype","Radiation Therapy","Fraction Genome Altered")]
+cbio$IDH <- cbio$Subtype %in% c("MUT","MUTCODEL")
+cbio$codel <- cbio$Subtype == "MUTCODEL"
+cbio <- cbio[ , c("Sample ID","IDH","codel","Subtype")]
 
-patients <- merge(patients, cbio, by.x="SAMPLE_ID", by.y="Sample ID", all.x=TRUE)
+patients <- merge(patients, cbio, by.x="SAMPLE_ID", by.y="Sample ID")
 patients$Subtype <- factor(patients$Subtype, c("WT","MUT","MUTCODEL"))
-patients$SAMPLE_ID <- NULL
+patients$dummy <- ifelse(patients$Subtype=="WT", 2, ifelse(patients$Subtype=="MUT", 0, 1))
 
-# --------------- Part II. 450K Data ---------------
+# --------------- Part II. CGI Aggregation ---------------
 cpg_list <- read.csv(paste0(OUT_DIR,"results/cpg_list.csv"))
 cgi_stats <- read.table(paste0(OUT_DIR,"results/cgi_sele.txt"))
 
-## 450k Data Loading & Subsetting:
+## 450k data loading & subsetting:
 lgg450 <- fread(paste0(TCGA_DIR,"jhu-usc.edu_LGG_HumanMethylation450.betaValue.tsv"), data.table=FALSE)
 rownames(lgg450) <- lgg450$V1
 lgg450$V1 <- NULL
@@ -45,9 +44,6 @@ lgg450 <- lgg450[ , colnames(lgg450) %in% patients$sample]
 lgg450 <- subset(lgg450, rownames(lgg450) %in% cpg_list$Name) #optional: speed things up
 lgg450 <- merge(lgg450, cpg_list, by.x="row.names", by.y="Name")
 lgg450$Row.names <- NULL
-
-## Check to see if all CGIs available in TCGA data:
-all(lgg450$UCSC_CpG_Islands_Name %in% cgi_stats$UCSC_CpG_Islands_Name)
 
 lgg450 <- aggregate(. ~ UCSC_CpG_Islands_Name, data=lgg450, FUN=mean)
 

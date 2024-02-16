@@ -12,20 +12,15 @@ patients$SampleTitle <- as.integer(patients$SampleTitle)
 patients$tumor_grade <- NA
 patients$tumor_grade[grepl("2", patients$diagnosis)] <- "G2"
 patients$tumor_grade[grepl("3", patients$diagnosis)] <- "G3"
-patients$histology <- gsub("[2,3]", "", patients$diagnosis)
 
-patients$chr1_loss <- as.logical(patients$chr1_loss)
-patients$chr19_loss <- as.logical(patients$chr19_loss)
 patients$IDH <- as.logical(patients$`idh mutation`)
-patients$codel <- patients$chr1_loss & patients$chr19_loss
-
-table(Codel=patients$codel, IDH=patients$IDH, useNA="always")
+patients$codel <- patients$chr1_loss==1 & patients$chr19_loss==1
 
 patients$Subtype <- ifelse(patients$IDH, "MUT", "WT")
 patients$Subtype[patients$IDH & patients$codel] <- "MUTCODEL"
-table(patients$Subtype, useNA="always")
 
-patients$`idh mutation` <- patients$diagnosis <- patients$expr_group <- NULL
+patients <- patients[ , c("Accession","tumor_grade","IDH","codel","Subtype")]
+patients$dummy <- ifelse(patients$Subtype=="WT", 2, ifelse(patients$Subtype=="MUT", 0, 1))
 
 ## CpG & CGI selected:
 cpg_list <- read.csv(paste0(OUT_DIR,"results/cpg_list.csv"))
@@ -51,10 +46,10 @@ lgg450 <- data.matrix(lgg450)
 dim(lgg450)
 
 ## Export:
-write.csv(patients, paste0(OUT_DIR,"results/GermanLGG_samples.csv"), row.names=FALSE, quote=FALSE)
-write.csv(lgg450, paste0(OUT_DIR,"results/GermanLGG_cgi.csv"), row.names=TRUE, quote=FALSE)
+write.csv(patients, paste0(OUT_DIR,"results/gcn_samples.csv"), row.names=FALSE, quote=FALSE)
+write.csv(lgg450, paste0(OUT_DIR,"results/gcn_cgi.csv"), row.names=TRUE, quote=FALSE)
 save(
  list = c("patients","lgg450","cpg_list","cgi_stats"),
- file = paste0(OUT_DIR, "results/GermanLGG_objects.RData"),
+ file = paste0(OUT_DIR, "results/gcn_objects.RData"),
  compress = TRUE
 )
