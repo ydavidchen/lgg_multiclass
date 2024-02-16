@@ -1,4 +1,4 @@
-# German Glioma Network LGG cohort: Unsupervised EDA
+# German Glioma Network: HCLUST
 
 rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))

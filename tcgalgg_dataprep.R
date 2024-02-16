@@ -4,7 +4,7 @@ rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("utils.R")
 
-# --------------- Part I: Patient- & Sample-level Covariates ---------------
+# --------------- Part I: Patient- & Sample-level Clinical Metadata ---------------
 patients <- read.csv(paste0(TCGA_DIR,"nationwidechildrens.org_LGG_bio.patient.tsv"), sep="\t", na.strings=c("NA",""))
 colnames(patients)[1] <- "patient"
 patients$age <- as.integer(patients$age_at_initial_pathologic_diagnosis)
@@ -34,14 +34,12 @@ patients$dummy <- ifelse(patients$Subtype=="WT", 2, ifelse(patients$Subtype=="MU
 cpg_list <- read.csv(paste0(OUT_DIR,"results/cpg_list.csv"))
 cgi_stats <- read.table(paste0(OUT_DIR,"results/cgi_sele.txt"))
 
-## 450k data loading & subsetting:
 lgg450 <- fread(paste0(TCGA_DIR,"jhu-usc.edu_LGG_HumanMethylation450.betaValue.tsv"), data.table=FALSE)
 rownames(lgg450) <- lgg450$V1
 lgg450$V1 <- NULL
 colnames(lgg450) <- substr(colnames(lgg450), 1, 16)
 lgg450 <- lgg450[ , colnames(lgg450) %in% patients$sample]
 
-## Aggregation:
 lgg450 <- subset(lgg450, rownames(lgg450) %in% cpg_list$Name) #optional: speed things up
 lgg450 <- merge(lgg450, cpg_list, by.x="row.names", by.y="Name")
 lgg450$Row.names <- NULL
@@ -51,8 +49,10 @@ lgg450 <- aggregate(. ~ UCSC_CpG_Islands_Name, data=lgg450, FUN=mean)
 rownames(lgg450) <- lgg450$UCSC_CpG_Islands_Name
 lgg450$UCSC_CpG_Islands_Name <- NULL
 lgg450 <- data.matrix(lgg450)
+lgg450 <- minfi::logit2(lgg450) #M-value
 dim(lgg450)
 
+stopifnot(identical(colnames(lgg450), patients$sample)) #checkpoint; if not: match
 
 ## Export: 
 write.csv(patients, paste0(OUT_DIR,"results/tcgalgg_patients.csv"), row.names=FALSE, quote=FALSE)
