@@ -26,6 +26,7 @@ cbio$codel <- cbio$Subtype == "MUTCODEL"
 cbio <- cbio[ , c("Sample ID","IDH","codel","Subtype")]
 
 patients <- merge(patients, cbio, by.x="SAMPLE_ID", by.y="Sample ID")
+patients$SAMPLE_ID <- NULL
 patients$Subtype <- factor(patients$Subtype, c("WT","MUT","MUTCODEL"))
 patients$dummy <- ifelse(patients$Subtype=="WT", 2, ifelse(patients$Subtype=="MUT", 0, 1))
 
