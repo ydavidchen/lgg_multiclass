@@ -1,4 +1,4 @@
-# German Glioma Network: HCLUST
+# German Glioma Network (GCN): HCLUST Analysis
 
 rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
