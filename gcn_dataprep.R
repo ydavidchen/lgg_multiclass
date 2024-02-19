@@ -1,4 +1,4 @@
-# German Glioma Network Data Preparation
+# German Glioma Network (GCN) Data Preparation
 
 rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -43,13 +43,14 @@ lgg450 <- data.matrix(lgg450)
 lgg450 <- minfi::logit2(winsorize(lgg450, 0.0001, 0.9999)) #M-value
 dim(lgg450)
 
-stopifnot(identical(colnames(lgg450), patients$Accession)) #checkpoint; if not: match
-
-## Export:
-write.csv(patients, paste0(OUT_DIR,"results/gcn_samples.csv"), row.names=FALSE, quote=FALSE)
-write.csv(lgg450, paste0(OUT_DIR,"results/gcn_cgi.csv"), row.names=TRUE, quote=FALSE)
+# --------------- Part III. Proc. Data Export ---------------
 save(
  list = c("patients","lgg450","cpg_list","cgi_stats"),
  file = paste0(OUT_DIR, "results/gcn_objects.RData"),
  compress = TRUE
 )
+
+lgg450 <- as.data.frame(t(lgg450))
+colnames(patients)[colnames(patients)=="Accession"] <- "sample"
+lgg450 <- merge(patients, lgg450, by.x="sample", by.y="row.names")
+write.csv(lgg450, paste0(OUT_DIR, "results/gcnlgg.csv"), row.names=TRUE, quote=FALSE)

@@ -52,13 +52,13 @@ lgg450 <- data.matrix(lgg450)
 lgg450 <- minfi::logit2(lgg450) #M-value
 dim(lgg450)
 
-stopifnot(identical(colnames(lgg450), patients$sample)) #checkpoint; if not: match
-
-## Export: 
-write.csv(patients, paste0(OUT_DIR,"results/tcgalgg_patients.csv"), row.names=FALSE, quote=FALSE)
-write.csv(lgg450, paste0(OUT_DIR,"results/tcgalgg_cgi_avg.csv"), row.names=TRUE, quote=FALSE)
+# --------------- Part III. Proc. Data Export ---------------
 save(
   list = c("lgg450", "patients", "cpg_list", "cgi_stats"),
   file = paste0(OUT_DIR, "results/tcgalgg_objects.RData"),
   compress = TRUE
 )
+
+lgg450 <- as.data.frame(t(lgg450))
+lgg450 <- merge(patients, lgg450, by.x="sample", by.y="row.names")
+write.csv(lgg450, paste0(OUT_DIR, "results/tcgalgg.csv"), row.names=TRUE, quote=FALSE)
