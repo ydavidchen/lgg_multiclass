@@ -14,11 +14,16 @@ Each cohort (TCGA - American or GCN - German) has the following scripts tagged:
 
 Additional scripts include utils.R (R helpers) and ml_utils.py (Python ML helpers) shared across the project.
 
-## Software Notes
+## Notes on Software Used
 
 R 4.3.1 was used for preparing and curating the data from raw data sources as well as exploratory data analyses.
 
 Python 3.12 was used for machine learning.  
 
-The curated datasets containing the computed CGI methylation values and clinical subtypes (CSV output of scripts tagged "_dataprep.R") were deposited in [Kaggle](https://www.kaggle.com/datasets/ydavidchen/lower-grade-glioma-cpg-islands-and-subtypes/). 
+## Other Notes
+
+The curated datasets containing the computed CGI methylation values and clinical subtypes (CSV output of scripts tagged "_dataprep.R") were deposited in [Kaggle](https://www.kaggle.com/datasets/ydavidchen/lower-grade-glioma-cpg-islands-and-subtypes/).
+
+The unsupervised and supervised ML analyses are excellent choices for teaching purposes and demos.
+
 
