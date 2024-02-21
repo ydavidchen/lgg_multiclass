@@ -1,4 +1,4 @@
-# Multiclass prediction of lower-grade glioma subtypes via gene promoter CpG island profiles: a tutorial
+# Hierarchical classification of lower-grade glioma subtypes via promoter-associated CpG island methylation profiles
 
 David Chen, Ph.D.
 
@@ -18,7 +18,7 @@ Additional scripts include utils.R (R helpers) and ml_utils.py (Python ML helper
 
 R 4.3.1 was used for preparing and curating the data from raw data sources as well as exploratory data analyses.
 
-Python 3.12 was used for machine learning.  
+Python 3.11 was used for machine learning.  
 
 ## Other Notes
 

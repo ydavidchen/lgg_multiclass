@@ -1,4 +1,4 @@
-# TCGA-LGG Data Preparation
+# TCGA-LGG Data Preparation for ML
 
 rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -60,5 +60,6 @@ save(
 )
 
 lgg450 <- as.data.frame(t(lgg450))
+patients$patient <- NULL
 lgg450 <- merge(patients, lgg450, by.x="sample", by.y="row.names")
-write.csv(lgg450, paste0(OUT_DIR, "results/tcgalgg.csv"), row.names=TRUE, quote=FALSE)
+write.csv(lgg450, paste0(OUT_DIR, "results/tcgalgg.csv"), row.names=FALSE, quote=FALSE)

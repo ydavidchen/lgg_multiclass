@@ -1,4 +1,4 @@
-# German Glioma Network (GCN) Data Preparation
+# German Glioma Network (GCN) Data Preparation for ML
 
 rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -7,7 +7,7 @@ source("utils.R")
 # --------------- Part I: Sample-level Clinical Metadata ---------------
 patients <- readxl::read_excel(paste0(DEU_DIR,"SeriesMatrices.xlsx"), sheet=2)
 patients <- as.data.frame(patients)
-patients$SampleTitle <- as.integer(patients$SampleTitle)
+colnames(patients)[colnames(patients)=="Accession"] <- "sample"
 
 patients$tumor_grade <- NA
 patients$tumor_grade[grepl("2", patients$diagnosis)] <- "G2"
@@ -19,7 +19,7 @@ patients$codel <- patients$chr1_loss==1 & patients$chr19_loss==1
 patients$Subtype <- ifelse(patients$IDH, "MUT", "WT")
 patients$Subtype[patients$IDH & patients$codel] <- "MUTCODEL"
 
-patients <- patients[ , c("Accession","tumor_grade","IDH","codel","Subtype")]
+patients <- patients[ , c("sample","tumor_grade","IDH","codel","Subtype")]
 patients$Subtype <- factor(patients$Subtype, c("WT","MUT","MUTCODEL"))
 patients$dummy <- ifelse(patients$Subtype=="WT", 2, ifelse(patients$Subtype=="MUT", 0, 1))
 
@@ -40,7 +40,7 @@ lgg450 <- aggregate(. ~ UCSC_CpG_Islands_Name, data=lgg450, FUN=mean)
 rownames(lgg450) <- lgg450$UCSC_CpG_Islands_Name
 lgg450$UCSC_CpG_Islands_Name <- NULL
 lgg450 <- data.matrix(lgg450)
-lgg450 <- minfi::logit2(winsorize(lgg450, 0.0001, 0.9999)) #M-value
+lgg450 <- minfi::logit2(winsorize(lgg450, 0.0001, 0.9999))
 dim(lgg450)
 
 # --------------- Part III. Proc. Data Export ---------------
@@ -51,6 +51,5 @@ save(
 )
 
 lgg450 <- as.data.frame(t(lgg450))
-colnames(patients)[colnames(patients)=="Accession"] <- "sample"
 lgg450 <- merge(patients, lgg450, by.x="sample", by.y="row.names")
 write.csv(lgg450, paste0(OUT_DIR, "results/gcnlgg.csv"), row.names=FALSE, quote=FALSE)

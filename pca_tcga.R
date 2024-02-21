@@ -1,4 +1,4 @@
-# TCGA-LGG: PCA & K-means
+# TCGA-LGG: PCA Execution
 
 rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))

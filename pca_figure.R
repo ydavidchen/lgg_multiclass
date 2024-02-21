@@ -1,4 +1,4 @@
-# Data Visualization: Paper Figure 2
+# PCA Figure with both cohorts
 
 rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -13,7 +13,7 @@ df$Class <- ifelse(df$Subtype=="WT", "0", ifelse(df$Subtype=="MUT", "1A", "1B"))
 table(df$Class)
 
 ggplot(df, aes(Dimension1, Dimension2, color=Class)) +
-  geom_point(size=5, alpha=0.5) +
+  geom_point(size=4, alpha=0.4) +
   scale_color_brewer(palette="Set1", direction=-1) +
   scale_x_continuous(limits=c(-3,2.5)) +
   facet_wrap(~ Dataset, ncol=2) +

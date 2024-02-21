@@ -6,8 +6,7 @@ source("utils.R")
 library(dplyr)
 
 MIN_SIZE <- 800
-MIN_CPGS <- 5
-# CGI_EXCL <- "chr8:144635308-144636026"
+MIN_CPGS <- 6
 
 ## Data Filtering:
 cpg_list <- load_450k_annot()
